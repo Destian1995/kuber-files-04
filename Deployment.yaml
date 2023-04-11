@@ -5,11 +5,11 @@ metadata:
 spec:
   selector:
     matchLabels:
-       elasticsearch
+       app: elasticsearch
   template:
     metadata:
       labels:
-        elasticsearch
+        app: elasticsearch
     spec:
       containers:
         - name: elasticsearch
