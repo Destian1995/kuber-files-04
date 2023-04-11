@@ -1,23 +1,44 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-app
+  name: elasticsearch
 spec:
-  replicas: 1
   selector:
     matchLabels:
-      app: my-app
+      app.kubernetes.io/name: elasticsearch
   template:
     metadata:
       labels:
-        app: my-app
+        app.kubernetes.io/name: elasticsearch
     spec:
       containers:
-        - name: multitool
-          image: wbitt/network-multitool
+        - name: elasticsearch
+          image: elasticsearch:7.9.3
+          env:
+            - name: discovery.type
+              value: single-node
+            - name: network.host
+              value: 127.0.0.1
+            - name: http.port
+              value: '9201'
+
+       - name: nginx-proxy
+          image: nginx:1.19.5
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
+              readOnly: true
+            - name: certs
+              mountPath: /certs
+              readOnly: true
           ports:
-            - containerPort: 8080
-        - name: nginx
-          image: nginx:latest
-          ports:
-            - containerPort: 80
+            - name: https
+              containerPort: 9200
+
+     volumes:
+        - name: nginx-config
+          configMap:
+            name: elasticsearch-nginx
+        - name: certs
+          secret:
+            secretName: elasticsearch-tls
