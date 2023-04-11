@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-app-deployment
+  name: my-app
 spec:
   replicas: 1
   selector:
@@ -17,3 +17,7 @@ spec:
           image: wbitt/network-multitool
           ports:
             - containerPort: 8080
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
