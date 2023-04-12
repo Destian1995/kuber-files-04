@@ -1,21 +1,40 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: elasticsearch
+  labels:
+    app: newspaper
+  name: newspaper
 spec:
+  replicas: 1
   selector:
     matchLabels:
-       app: elasticsearch
+      app: newspaper
   template:
     metadata:
       labels:
-        app: elasticsearch
+        app: newspaper
     spec:
       containers:
-        - name: elasticsearch
-          image: elasticsearch:7.9.3
-        - name: nginx-proxy
-          image: nginx:1.19.5
-          ports:
-            - name: https
-              containerPort: 9200
+      - image: kraktorist/news-backend:1.0
+        name: news-backend
+        env:
+          - name: DATABASE_URL
+            value: postgres://postgres:postgres@postgres:5432/news
+        ports:
+          - containerPort: 9000
+        volumeMounts:
+        - mountPath: /static
+          name: static
+      - image: kraktorist/news-frontend:1.1
+        name: news-frontend
+        ports:
+          - containerPort: 80
+        env:
+          - name: BASE_URL
+            value: http://newspaper:9000
+        volumeMounts:
+        - mountPath: /static
+          name: static
+      volumes:
+      - name: static
+        emptyDir: {}
